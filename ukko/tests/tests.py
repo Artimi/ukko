@@ -55,3 +55,9 @@ class ActivityListTestCase(unittest.TestCase):
         activities_order_real = [i for i in self.al]
         self.assertListEqual(activities_order_real, self.activities_order)
 
+    def test_precedence_feasibility(self):
+        self.assertTrue(self.al.is_precedence_feasible())
+        wrong_order = self.activities_order
+        wrong_order[0], wrong_order[1] = wrong_order[1], wrong_order[0]
+        al_wrong = ActivityList(self.problem, wrong_order)
+        self.assertFalse(al_wrong.is_precedence_feasible())

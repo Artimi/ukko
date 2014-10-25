@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import igraph
-
+from utils import memoized
 
 class Problem(object):
 
@@ -16,4 +16,6 @@ class Problem(object):
                                   graph_attrs=graph_attrs)
         self.__dict__.update(problem_dict)
 
-
+    @memoized
+    def predecessors(self, activity):
+        return self.graph.predecessors(activity)
