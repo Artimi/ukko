@@ -1,6 +1,7 @@
 import unittest
 import nose
 
+import numpy as np
 from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization
 
 TEST_FILE = '../../psplib/j30rcp/J301_1.RCP'
@@ -14,14 +15,12 @@ class ParserTestCase(unittest.TestCase):
     def test_basic_info(self):
         self.assertEqual(self.result['num_activities'], 32)
         self.assertEqual(self.result['num_resources'], 4)
-        self.assertListEqual(self.result['res_constraints'], [12, 13, 4, 12])
+        np.testing.assert_array_equal(self.result['res_constraints'], np.array([12, 13, 4, 12], ndmin=2).T)
 
     def test_activities(self):
         activity = self.result['activities']
         self.assertEqual(activity['duration'][1], 8)
-        self.assertListEqual(activity['res_demands'][1], [4, 0, 0, 0])
-        # self.assertEqual(activity['num_successors'], 3)
-        # self.assertListEqual(activity['successors'], [5, 10, 14])
+        np.testing.assert_array_equal(activity['res_demands'][:, 1], np.array([4, 0, 0, 0]))
 
 
 class ProblemTestCase(unittest.TestCase):
@@ -98,7 +97,8 @@ class ResourceUtilizationTestCase(unittest.TestCase):
         self.assertGreaterEqual(self.ru.max_makespan, 18)
 
     def test_free(self):
-        self.assertTrue(self.ru.is_free(self.problem.res_constraints, 0, 5))
-        self.ru.add(self.problem.res_constraints, 0, 5)
-        self.assertFalse(self.ru.is_free([1,1,1,1], 4, 6))
+        res_constraints = np.array([12, 13, 4, 12], dtype=int)
+        self.assertTrue(self.ru.is_free(res_constraints, 0, 5))
+        self.ru.add(res_constraints, 0, 5)
+        self.assertFalse(self.ru.is_free(np.array([1, 1, 1, 1], ndmin=2).T, 4, 6))
 
