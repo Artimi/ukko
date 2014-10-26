@@ -3,6 +3,7 @@
 import igraph
 from utils import memoized
 
+
 class Problem(object):
 
     def __init__(self, problem_dict):
@@ -16,8 +17,23 @@ class Problem(object):
                                   edges=self.problem_dict['edges'],
                                   vertex_attrs=vertex_attrs,
                                   graph_attrs=graph_attrs)
-        self.__dict__.update(problem_dict)
 
     @memoized
     def predecessors(self, activity):
         return self.graph.predecessors(activity)
+
+    @property
+    def num_activities(self):
+        return self.problem_dict['num_activities']
+
+    @property
+    def num_resources(self):
+        return self.problem_dict['num_resources']
+
+    @property
+    def res_constraints(self):
+        return self.problem_dict['res_constraints']
+
+    @property
+    def activities(self):
+        return self.problem_dict['activities']
