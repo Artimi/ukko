@@ -37,6 +37,11 @@ class ProblemTestCase(unittest.TestCase):
     def test_dict_class(self):
         self.assertEqual(self.problem.num_activities, self.problem_dict['num_activities'])
 
+    def test_predecessors(self):
+        self.assertTrue(self.problem.is_predecessor_of(0, 1))
+        self.assertFalse(self.problem.is_predecessor_of(1, 0))
+        self.assertTrue(self.problem.is_predecessor_of_list(0, [1, 2, 3]))
+
 
 class ActivityListTestCase(unittest.TestCase):
     def setUp(self):
@@ -79,6 +84,13 @@ class ScheduleTestCase(unittest.TestCase):
         self.schedule.add(1, 0)
         self.assertIn(1, self.schedule.start_times[0])
         self.assertIn(1, self.schedule.finish_times[self.problem_dict['activities']['duration'][1]])
+
+    def test_can_place(self):
+        self.assertFalse(self.schedule._can_place(1, 0, 8))  # violated precedence 0->1
+        self.schedule.add(0, 0)
+        self.assertTrue(self.schedule._can_place(1, 0, 8))
+        self.schedule.add(1, 0)
+        self.assertFalse(self.schedule._can_place(2, 0, 4))  # violated resource constraints
 
 
 class ResourceUtilizationTestCase(unittest.TestCase):

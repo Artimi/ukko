@@ -30,10 +30,17 @@ class Schedule(object):
             raise ConstraintException('Cannot be placed because of constraints')
 
     def _can_place(self, activity, start_time, finish_time):
-        if self.res_utilization.is_free(self.problem.activities['res_demands'][:, activity],
-                                        start_time, finish_time):
-            return True
-        # TODO: precedence
+        return self.res_utilization.is_free(self.problem.activities['res_demands'][:, activity], start_time, finish_time) and \
+               self.problem.contains_all_predecessors(self._finished_activities(start_time), activity)
+
+    def _finished_activities(self, time):
+        result = set()
+        for t in xrange(time + 1):
+            try:
+                result.update(self.finish_times[t])
+            except KeyError:
+                pass
+        return result
 
 
 class ResourceUtilization(object):

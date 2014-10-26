@@ -16,8 +16,9 @@ class ActivityList(object):
         return self._array[item]
 
     def is_precedence_feasible(self):
-        for index, activity in enumerate(self):
-            for previous in self[:index]:
-                if activity in self.problem.predecessors(previous):
-                    return False
+        act_previous = set()
+        for activity in self:
+            if not self.problem.contains_all_predecessors(act_previous, activity):
+                return False
+            act_previous.add(activity)
         return True

@@ -20,7 +20,11 @@ class Problem(object):
 
     @memoized
     def predecessors(self, activity):
-        return self.graph.predecessors(activity)
+        return set(self.graph.predecessors(activity))
+
+    def contains_all_predecessors(self, container, activity):
+        act_predecessors = self.predecessors(activity)
+        return container.intersection(act_predecessors) == act_predecessors
 
     @property
     def num_activities(self):
