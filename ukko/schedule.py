@@ -13,6 +13,8 @@ class Schedule(object):
         self.start_times = dict()
         self.finish_times = dict()
         self.res_utilization = ResourceUtilization(problem)
+        self.scheduled_activities = set()
+        self.finish_times_activities = dict()
 
     def _add_to_list(self, activity, l, time):
         try:
@@ -26,8 +28,10 @@ class Schedule(object):
             self._add_to_list(activity, self.start_times, start_time)
             self._add_to_list(activity, self.finish_times, finish_time)
             self.res_utilization.add(self.problem.activities['res_demands'][:, activity], start_time, finish_time)
+            self.scheduled_activities.add(activity)
+            self.finish_times_activities[activity] = finish_time
         else:
-            raise ConstraintException('Cannot be placed because of constraints')
+            raise ConstraintException('Activity {0} cannot be placed at time {1} because of constraints'.format(activity, start_time))
 
     def _can_place(self, activity, start_time, finish_time):
         return self.res_utilization.is_free(self.problem.activities['res_demands'][:, activity], start_time, finish_time) and \
@@ -42,6 +46,23 @@ class Schedule(object):
                 pass
         return result
 
+    @property
+    def eligible_activities(self):
+        # improve
+        result = set()
+        for activity in xrange(self.problem.num_activities):
+            if activity not in self.scheduled_activities and self.problem.contains_all_predecessors(self.scheduled_activities, activity):
+                result.add(activity)
+        return result
+
+    @property
+    def makespan(self):
+        try:
+            makespan = max(self.finish_times.keys())
+        except ValueError:
+            makespan = 0
+        return makespan
+
 
 class ResourceUtilization(object):
     def __init__(self, problem, max_makespan=16):
@@ -53,7 +74,7 @@ class ResourceUtilization(object):
         if finish_time > self.max_makespan:
             self.extend_makespan(finish_time)
         demands_array = np.expand_dims(demands, 1)
-        self.utilization[:, start_time:finish_time+1] += demands_array
+        self.utilization[:, start_time:finish_time] += demands_array
 
     def extend_makespan(self, minimal_extend_time):
         if minimal_extend_time > self.max_makespan:
@@ -64,6 +85,9 @@ class ResourceUtilization(object):
 
     def get(self, resource, time):
         return self.utilization[resource][time]
+
+    def get_capacity(self, resource, time):
+        return self.problem.res_constraints[resource] - self.get(resource, time)
 
     def is_free(self, demands, start_time, finish_time):
         if demands.shape != self.problem.res_constraints.shape:

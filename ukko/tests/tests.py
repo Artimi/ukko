@@ -2,7 +2,8 @@ import unittest
 import nose
 
 import numpy as np
-from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization
+from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS
+
 
 TEST_FILE = '../../psplib/j30rcp/J301_1.RCP'
 
@@ -36,11 +37,6 @@ class ProblemTestCase(unittest.TestCase):
 
     def test_dict_class(self):
         self.assertEqual(self.problem.num_activities, self.problem_dict['num_activities'])
-
-    def test_predecessors(self):
-        self.assertTrue(self.problem.is_predecessor_of(0, 1))
-        self.assertFalse(self.problem.is_predecessor_of(1, 0))
-        self.assertTrue(self.problem.is_predecessor_of_list(0, [1, 2, 3]))
 
 
 class ActivityListTestCase(unittest.TestCase):
@@ -92,6 +88,21 @@ class ScheduleTestCase(unittest.TestCase):
         self.schedule.add(1, 0)
         self.assertFalse(self.schedule._can_place(2, 0, 4))  # violated resource constraints
 
+    def test_makespan(self):
+        self.assertEqual(self.schedule.makespan, 0)
+        self.schedule.add(0, 0)
+        self.assertEqual(self.schedule.makespan, 0)
+        self.schedule.add(1, 0)
+        self.assertEqual(self.schedule.makespan, 8)
+
+
+    def test_eligible_activities(self):
+        self.assertEqual(self.schedule.eligible_activities, {0})
+        self.schedule.add(0, 0)
+        self.assertEqual(self.schedule.eligible_activities, {1, 2, 3})
+        self.schedule.add(1, 0)
+        self.assertEqual(self.schedule.eligible_activities, {2, 3, 5, 10, 14})
+
 
 class ResourceUtilizationTestCase(unittest.TestCase):
     def setUp(self):
@@ -102,7 +113,10 @@ class ResourceUtilizationTestCase(unittest.TestCase):
 
     def test_add(self):
         self.ru.add([4, 0, 0, 0], 0, 8)
-        self.assertTrue(self.ru.get(0, 0), 4)
+        self.assertEqual(self.ru.get(0, 0), 4)
+        self.assertEqual(self.ru.get(0, 7), 4)
+        self.assertEqual(self.ru.get(0, 8), 0)
+        self.assertEqual(self.ru.get(0, 9), 0)
 
     def test_extend(self):
         self.ru.add([4, 0, 0, 0], 16, 18)
@@ -114,3 +128,18 @@ class ResourceUtilizationTestCase(unittest.TestCase):
         self.ru.add(res_constraints, 0, 5)
         self.assertFalse(self.ru.is_free(np.array([1, 1, 1, 1], ndmin=2).T, 4, 6))
 
+
+class SSGSTestCase(unittest.TestCase):
+    def setUp(self):
+        parser = RCPParser()
+        self.problem_dict = parser(TEST_FILE)
+        self.problem = Problem(self.problem_dict)
+        self.activities_order = [0, 1, 2, 3, 5, 10, 14, 6, 7, 12, 4, 8, 9, 25, 11, 18, 26,
+                                 17, 15, 13, 28, 19, 20, 16, 24, 27, 21, 30, 22, 23, 29, 31]
+        self.al = ActivityList(self.problem, self.activities_order)
+        self.ssgs = SSGS(self.problem)
+        self.schedule = self.ssgs.get_schedule()
+
+    def test_basic(self):
+        self.assertGreater(self.schedule.makespan, 40)
+        self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
