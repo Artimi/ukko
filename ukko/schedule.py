@@ -5,7 +5,6 @@ import math
 from utils import ConstraintException
 import numpy as np
 
-
 class Schedule(object):
 
     def __init__(self, problem):
@@ -62,6 +61,22 @@ class Schedule(object):
         except ValueError:
             makespan = 0
         return makespan
+
+    def array_representation(self):
+        arrays = []
+        for res in xrange(self.problem.num_resources):
+            arrays.append(np.zeros((self.problem.res_constraints[res], self.makespan), dtype=int))
+        for time in sorted(self.start_times):
+            for activity in self.start_times[time]:
+                duration = self.problem.activities['duration'][activity]
+                res_demands = self.problem.activities['res_demands'][:, activity]
+                for res in xrange(self.problem.num_resources):
+                    if res_demands[res] > 0:
+                        res_offset = 0
+                        while not np.all(arrays[res][res_offset:res_offset+res_demands[res], time:time+duration] == 0):
+                            res_offset += 1
+                        arrays[res][res_offset:res_offset+res_demands[res], time:time+duration] += activity
+        return arrays
 
 
 class ResourceUtilization(object):
