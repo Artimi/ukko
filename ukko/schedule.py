@@ -36,8 +36,9 @@ class Schedule(object):
 
     def can_place(self, activity, start_time):
         finish_time = start_time + self.problem.activities['duration'][activity]
-        return self.res_utilization.is_free(self.problem.activities['res_demands'][:, activity], start_time, finish_time) and \
-               self.problem.contains_all_predecessors(self._finished_activities(start_time), activity)
+        res_free = self.res_utilization.is_free(self.problem.activities['res_demands'][:, activity], start_time, finish_time)
+        precedence = self.problem.contains_all_predecessors(self._finished_activities(start_time), activity)
+        return res_free and precedence
 
     def _finished_activities(self, time):
         result = set()

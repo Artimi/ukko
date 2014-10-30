@@ -2,7 +2,7 @@ import unittest
 import nose
 
 import numpy as np
-from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS
+from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, SSGS_AL
 
 
 TEST_FILE = '../../psplib/j30rcp/J301_1.RCP'
@@ -134,12 +134,16 @@ class SSGSTestCase(unittest.TestCase):
         parser = RCPParser()
         self.problem_dict = parser(TEST_FILE)
         self.problem = Problem(self.problem_dict)
-        self.activities_order = [0, 1, 2, 3, 5, 10, 14, 6, 7, 12, 4, 8, 9, 25, 11, 18, 26,
-                                 17, 15, 13, 28, 19, 20, 16, 24, 27, 21, 30, 22, 23, 29, 31]
-        self.al = ActivityList(self.problem, self.activities_order)
-        self.ssgs = SSGS(self.problem)
-        self.schedule = self.ssgs.get_schedule()
 
     def test_basic(self):
-        self.assertGreater(self.schedule.makespan, 40)
-        self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
+        ssgs = SSGS(self.problem)
+        schedule = ssgs.get_schedule()
+        self.assertEqual(len(schedule.scheduled_activities), self.problem.num_activities)
+
+    def test_al(self):
+        activities_order = [0, 2, 1, 3, 5, 10, 14, 6, 7, 12, 4, 8, 9, 25, 11, 18, 26,
+                            17, 15, 13, 28, 19, 20, 16, 24, 27, 21, 30, 22, 23, 29, 31]
+        al = ActivityList(self.problem, activities_order)
+        ssgs_al = SSGS_AL(self.problem, al)
+        schedule = ssgs_al.get_schedule()
+        self.assertEqual(len(schedule.scheduled_activities), self.problem.num_activities)

@@ -4,4 +4,4 @@ from rcpparser import RCPParser
 from problem import Problem
 from activity_list import ActivityList
 from schedule import Schedule, ResourceUtilization
-from sgs import SSGS
+from sgs import SSGS, SSGS_AL

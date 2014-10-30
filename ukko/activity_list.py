@@ -15,6 +15,9 @@ class ActivityList(object):
     def __getitem__(self, item):
         return self._array[item]
 
+    def __iter__(self):
+        return self._array.__iter__()
+
     def is_precedence_feasible(self):
         act_previous = set()
         for activity in self:
