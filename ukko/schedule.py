@@ -4,6 +4,8 @@ from __future__ import division
 import math
 from utils import ConstraintException
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 class Schedule(object):
 
@@ -64,8 +66,10 @@ class Schedule(object):
 
     def array_representation(self):
         arrays = []
+        activity_corner = []
         for res in xrange(self.problem.num_resources):
             arrays.append(np.zeros((self.problem.res_constraints[res], self.makespan), dtype=int))
+            activity_corner.append(dict())
         for time in sorted(self.start_times):
             for activity in self.start_times[time]:
                 duration = self.problem.activities['duration'][activity]
@@ -76,7 +80,30 @@ class Schedule(object):
                         while not np.all(arrays[res][res_offset:res_offset+res_demands[res], time:time+duration] == 0):
                             res_offset += 1
                         arrays[res][res_offset:res_offset+res_demands[res], time:time+duration] += activity
-        return arrays
+                        activity_corner[res][activity] = (time, res_offset)
+        return arrays, activity_corner
+
+    def plot(self):
+        arrays, activity_corner = self.array_representation()
+        flatui = ["#ffffff", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
+        cmap = sns.blend_palette(flatui, as_cmap=True)
+        sns.set_style("white")
+        plt.figure(figsize=(16, 12))
+        for index, res in enumerate(arrays):
+            plt.subplot(self.problem.num_resources, 1, index + 1)
+            plt.title('Resource #{0}'.format(index))
+            plt.ylim((0, self.problem.res_constraints[index] + 1))
+            plt.ylabel('Resource utilization')
+            plt.xlabel('Time')
+            for activity, coor in activity_corner[index].items():
+                plt.annotate(str(activity), coor)
+            plt.imshow(res, interpolation='none', cmap=cmap, origin='lower', aspect='auto')
+        plt.tight_layout()
+        plt.plot()
+
+    def save_plot(self, file_name):
+        self.plot()
+        plt.savefig(file_name)
 
 
 class ResourceUtilization(object):
