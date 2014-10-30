@@ -82,11 +82,11 @@ class ScheduleTestCase(unittest.TestCase):
         self.assertIn(1, self.schedule.finish_times[self.problem_dict['activities']['duration'][1]])
 
     def test_can_place(self):
-        self.assertFalse(self.schedule._can_place(1, 0, 8))  # violated precedence 0->1
+        self.assertFalse(self.schedule.can_place(1, 0))  # violated precedence 0->1
         self.schedule.add(0, 0)
-        self.assertTrue(self.schedule._can_place(1, 0, 8))
+        self.assertTrue(self.schedule.can_place(1, 0))
         self.schedule.add(1, 0)
-        self.assertFalse(self.schedule._can_place(2, 0, 4))  # violated resource constraints
+        self.assertFalse(self.schedule.can_place(2, 0))  # violated resource constraints
 
     def test_makespan(self):
         self.assertEqual(self.schedule.makespan, 0)

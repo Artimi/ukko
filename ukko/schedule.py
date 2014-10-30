@@ -25,7 +25,7 @@ class Schedule(object):
 
     def add(self, activity, start_time):
         finish_time = start_time + self.problem.activities['duration'][activity]
-        if self._can_place(activity, start_time, finish_time):
+        if self.can_place(activity, start_time):
             self._add_to_list(activity, self.start_times, start_time)
             self._add_to_list(activity, self.finish_times, finish_time)
             self.res_utilization.add(self.problem.activities['res_demands'][:, activity], start_time, finish_time)
@@ -34,7 +34,8 @@ class Schedule(object):
         else:
             raise ConstraintException('Activity {0} cannot be placed at time {1} because of constraints'.format(activity, start_time))
 
-    def _can_place(self, activity, start_time, finish_time):
+    def can_place(self, activity, start_time):
+        finish_time = start_time + self.problem.activities['duration'][activity]
         return self.res_utilization.is_free(self.problem.activities['res_demands'][:, activity], start_time, finish_time) and \
                self.problem.contains_all_predecessors(self._finished_activities(start_time), activity)
 
@@ -136,4 +137,4 @@ class ResourceUtilization(object):
             demands_array = np.expand_dims(demands, 1)
         else:
             demands_array = demands
-        return np.all(self.utilization[:, start_time:finish_time + 1] + demands_array <= self.problem.res_constraints)
+        return np.all(self.utilization[:, start_time:finish_time] + demands_array <= self.problem.res_constraints)

@@ -11,10 +11,9 @@ class SSGS(object):
     def get_schedule(self):
         for i in xrange(self.problem.num_activities):
             activity = self._select_activity()
-            duration = self.problem.activities['duration'][activity]
-            ESj = self._compute_earliest_start(activity)
-            Sj = self._compute_real_start(ESj, activity, duration)
-            self.S.add(activity, Sj)
+            precedence_feasible_start = self._compute_earliest_start(activity)
+            real_start = self._compute_real_start(activity, precedence_feasible_start)
+            self.S.add(activity, real_start)
         return self.S
 
     def _select_activity(self):
@@ -27,10 +26,10 @@ class SSGS(object):
                 max_finish_time_predecessors = self.S.finish_times_activities[predecessor]
         return max_finish_time_predecessors
 
-    def _compute_real_start(self, ESj, activity, duration):
-        Sj = 0
+    def _compute_real_start(self, activity, precedence_feasible_start):
+        real_start = 0
         for t in sorted(self.S.finish_times.keys()):
-            if ESj <= t and self.S._can_place(activity, t, t + duration):
-                Sj = t
+            if precedence_feasible_start <= t and self.S.can_place(activity, t):
+                real_start = t
                 break
-        return Sj
+        return real_start
