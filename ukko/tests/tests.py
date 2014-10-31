@@ -3,7 +3,7 @@ import nose
 
 import numpy as np
 from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, SSGS_AL
-
+from ukko.utils import PrecedenceException
 
 TEST_FILE = '../../psplib/j30rcp/J301_1.RCP'
 
@@ -59,8 +59,7 @@ class ActivityListTestCase(unittest.TestCase):
         self.assertTrue(self.al.is_precedence_feasible())
         wrong_order = self.activities_order
         wrong_order[0], wrong_order[1] = wrong_order[1], wrong_order[0]
-        al_wrong = ActivityList(self.problem, wrong_order)
-        self.assertFalse(al_wrong.is_precedence_feasible())
+        self.assertRaises(PrecedenceException, ActivityList, self.problem, wrong_order)
 
 
 class ScheduleTestCase(unittest.TestCase):

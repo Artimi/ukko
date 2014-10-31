@@ -5,6 +5,9 @@ from functools import wraps
 class ConstraintException(Exception):
     pass
 
+class PrecedenceException(Exception):
+    pass
+
 def memoized(func):
     memo = {}
     @wraps(func)

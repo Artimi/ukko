@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from utils import PrecedenceException
 
 
 class ActivityList(object):
@@ -11,6 +12,8 @@ class ActivityList(object):
             self._array = np.zeros(self.problem.num_activities, dtype=int)
         else:
             self._array = np.array(array, dtype=int)
+        if not self.is_precedence_feasible():
+            raise PrecedenceException("Given array is not precedence feasible.")
 
     def __getitem__(self, item):
         return self._array[item]
