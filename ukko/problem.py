@@ -45,3 +45,9 @@ class Problem(object):
     @property
     def activities(self):
         return self.problem_dict['activities']
+
+    def duration(self, activity):
+        return self.activities['duration'][activity]
+
+    def demands(self, activity):
+        return self.activities['res_demands'][:, activity]

@@ -26,11 +26,11 @@ class Schedule(object):
             l[time] = [activity]
 
     def add(self, activity, start_time):
-        finish_time = start_time + self.problem.activities['duration'][activity]
+        finish_time = start_time + self.problem.duration(activity)
         if self.can_place(activity, start_time):
             self._add_to_list(activity, self.start_times, start_time)
             self._add_to_list(activity, self.finish_times, finish_time)
-            self.res_utilization.add(self.problem.activities['res_demands'][:, activity], start_time, finish_time)
+            self.res_utilization.add(self.problem.demands(activity), start_time, finish_time)
             self.scheduled_activities.add(activity)
             self.finish_times_activities[activity] = finish_time
             self.start_times_activities[activity] = start_time
@@ -42,18 +42,18 @@ class Schedule(object):
             finish_time = self.finish_times_activities[activity]
         except KeyError:
             raise KeyError("Activity {0} has not been scheduled yet.".format(activity))
-        duration = self.problem.activities['duration'][activity]
+        duration = self.problem.duration(activity)
         start_time = finish_time - duration
         self.start_times[start_time].remove(activity)
         self.finish_times[finish_time].remove(activity)
         self.scheduled_activities.remove(activity)
         del self.finish_times_activities[activity]
         del self.start_times_activities[activity]
-        self.res_utilization.remove(self.problem.activities['res_demands'][:, activity], start_time, finish_time)
+        self.res_utilization.remove(self.problem.demands(activity), start_time, finish_time)
 
     def can_place(self, activity, start_time):
-        finish_time = start_time + self.problem.activities['duration'][activity]
-        res_free = self.res_utilization.is_free(self.problem.activities['res_demands'][:, activity], start_time, finish_time)
+        finish_time = start_time + self.problem.duration(activity)
+        res_free = self.res_utilization.is_free(self.problem.demands(activity), start_time, finish_time)
         precedence = self.problem.contains_all_predecessors(self._finished_activities(start_time), activity)
         return res_free and precedence
 
@@ -65,7 +65,7 @@ class Schedule(object):
         return max_finish_time_predecessors
 
     def latest_precedence_start(self, activity):
-        duration = self.problem.activities['duration'][activity]
+        duration = self.problem.duration(activity)
         min_finish_time_successors = self.makespan
         for successor in self.problem.successors(activity):
             if min_finish_time_successors > self.start_times_activities[successor]:
@@ -106,8 +106,8 @@ class Schedule(object):
             activity_corner.append(dict())
         for time in sorted(self.start_times):
             for activity in self.start_times[time]:
-                duration = self.problem.activities['duration'][activity]
-                res_demands = self.problem.activities['res_demands'][:, activity]
+                duration = self.problem.duration(activity)
+                res_demands = self.problem.demands(activity)
                 for res in xrange(self.problem.num_resources):
                     if res_demands[res] > 0:
                         res_offset = 0
@@ -140,7 +140,7 @@ class Schedule(object):
         plt.savefig(file_name)
 
     def shift(self, direction='right'):
-        if direction =='right':
+        if direction == 'right':
             # from right to left
             activity_list = sorted(self.start_times.items(), reverse=True)
         elif direction == 'left':
