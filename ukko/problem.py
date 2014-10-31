@@ -22,6 +22,10 @@ class Problem(object):
     def predecessors(self, activity):
         return set(self.graph.predecessors(activity))
 
+    @memoized
+    def successors(self, activity):
+        return set(self.graph.successors(activity))
+
     def contains_all_predecessors(self, container, activity):
         act_predecessors = self.predecessors(activity)
         return container.intersection(act_predecessors) == act_predecessors

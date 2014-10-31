@@ -81,6 +81,19 @@ class ScheduleTestCase(unittest.TestCase):
         self.assertIn(1, self.schedule.start_times[0])
         self.assertIn(1, self.schedule.finish_times[self.problem_dict['activities']['duration'][1]])
 
+    def test_remove(self):
+        self.assertRaises(KeyError, self.schedule.remove, 0)
+        self.schedule.add(0, 0)
+        self.schedule.remove(0)
+        self.assertNotIn(0, self.schedule.start_times[0])
+        self.assertNotIn(0, self.schedule.finish_times[0])
+        self.schedule.add(0, 0)
+        self.schedule.add(1, 0)
+        self.schedule.remove(1)
+        self.assertNotIn(1, self.schedule.start_times[0])
+        self.assertNotIn(1, self.schedule.finish_times[self.problem_dict['activities']['duration'][1]])
+
+
     def test_can_place(self):
         self.assertFalse(self.schedule.can_place(1, 0))  # violated precedence 0->1
         self.schedule.add(0, 0)
@@ -95,13 +108,29 @@ class ScheduleTestCase(unittest.TestCase):
         self.schedule.add(1, 0)
         self.assertEqual(self.schedule.makespan, 8)
 
-
     def test_eligible_activities(self):
         self.assertEqual(self.schedule.eligible_activities, {0})
         self.schedule.add(0, 0)
         self.assertEqual(self.schedule.eligible_activities, {1, 2, 3})
         self.schedule.add(1, 0)
         self.assertEqual(self.schedule.eligible_activities, {2, 3, 5, 10, 14})
+
+    def test_earliest_start(self):
+        self.schedule.add(0, 0)
+        self.schedule.add(1, 0)
+        self.assertEqual(self.schedule.earliest_precedence_start(5), 8)
+
+    def test_shift(self):
+        ssgs_al = SSGS_AL(self.problem, self.al)
+        self.schedule = ssgs_al.get_schedule()
+        initial_makespan = self.schedule.makespan
+        self.schedule.shift('right')
+        self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
+        self.schedule.shift('right')  # nothing should change
+        self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
+        self.schedule.shift('left')
+        self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
+        self.assertGreaterEqual(initial_makespan, self.schedule.makespan)  # makespan should be same or better
 
 
 class ResourceUtilizationTestCase(unittest.TestCase):
@@ -117,6 +146,13 @@ class ResourceUtilizationTestCase(unittest.TestCase):
         self.assertEqual(self.ru.get(0, 7), 4)
         self.assertEqual(self.ru.get(0, 8), 0)
         self.assertEqual(self.ru.get(0, 9), 0)
+
+    def test_remove(self):
+        self.assertRaises(KeyError, self.ru.remove, [1, 1, 1, 1], 0, 8)
+        self.ru.add([4, 0, 0, 0], 0, 8)
+        self.ru.remove([4, 0, 0, 0], 0, 8)
+        self.assertEqual(self.ru.get(0, 0), 0)
+        self.assertEqual(self.ru.get(0, 8), 0)
 
     def test_extend(self):
         self.ru.add([4, 0, 0, 0], 16, 18)

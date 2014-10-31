@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
 class Schedule(object):
 
     def __init__(self, problem):
@@ -16,6 +17,7 @@ class Schedule(object):
         self.res_utilization = ResourceUtilization(problem)
         self.scheduled_activities = set()
         self.finish_times_activities = dict()
+        self.start_times_activities = dict()
 
     def _add_to_list(self, activity, l, time):
         try:
@@ -31,14 +33,44 @@ class Schedule(object):
             self.res_utilization.add(self.problem.activities['res_demands'][:, activity], start_time, finish_time)
             self.scheduled_activities.add(activity)
             self.finish_times_activities[activity] = finish_time
+            self.start_times_activities[activity] = start_time
         else:
             raise ConstraintException('Activity {0} cannot be placed at time {1} because of constraints'.format(activity, start_time))
+
+    def remove(self, activity):
+        try:
+            finish_time = self.finish_times_activities[activity]
+        except KeyError:
+            raise KeyError("Activity {0} has not been scheduled yet.".format(activity))
+        duration = self.problem.activities['duration'][activity]
+        start_time = finish_time - duration
+        self.start_times[start_time].remove(activity)
+        self.finish_times[finish_time].remove(activity)
+        self.scheduled_activities.remove(activity)
+        del self.finish_times_activities[activity]
+        del self.start_times_activities[activity]
+        self.res_utilization.remove(self.problem.activities['res_demands'][:, activity], start_time, finish_time)
 
     def can_place(self, activity, start_time):
         finish_time = start_time + self.problem.activities['duration'][activity]
         res_free = self.res_utilization.is_free(self.problem.activities['res_demands'][:, activity], start_time, finish_time)
         precedence = self.problem.contains_all_predecessors(self._finished_activities(start_time), activity)
         return res_free and precedence
+
+    def earliest_precedence_start(self, activity):
+        max_finish_time_predecessors = 0
+        for predecessor in self.problem.predecessors(activity):
+            if max_finish_time_predecessors < self.finish_times_activities[predecessor]:
+                max_finish_time_predecessors = self.finish_times_activities[predecessor]
+        return max_finish_time_predecessors
+
+    def latest_precedence_start(self, activity):
+        duration = self.problem.activities['duration'][activity]
+        min_finish_time_successors = self.makespan
+        for successor in self.problem.successors(activity):
+            if min_finish_time_successors > self.start_times_activities[successor]:
+                min_finish_time_successors = self.start_times_activities[successor]
+        return min_finish_time_successors - duration
 
     def _finished_activities(self, time):
         result = set()
@@ -107,6 +139,33 @@ class Schedule(object):
         self.plot()
         plt.savefig(file_name)
 
+    def shift(self, direction='right'):
+        if direction =='right':
+            # from right to left
+            activity_list = sorted(self.start_times.items(), reverse=True)
+        elif direction == 'left':
+            # from left to right
+            activity_list = sorted(self.start_times.items())
+        for start_time, activities in activity_list:
+            for activity in activities:
+                self.remove(activity)
+                if direction == 'right':
+                    time_list = xrange(self.latest_precedence_start(activity), start_time - 1, -1)
+                elif direction == 'left':
+                    time_list = xrange(self.earliest_precedence_start(activity), start_time + 1)
+                for t in time_list:
+                    if self.can_place(activity, t):
+                        self.add(activity, t)
+                        break
+
+    def double_justification(self):
+        makespan = self.makespan
+        new_makespan = 0
+        while new_makespan < makespan:
+            self.shift('right')
+            self.shift('left')
+            new_makespan = self.makespan
+
 
 class ResourceUtilization(object):
     def __init__(self, problem, max_makespan=16):
@@ -119,6 +178,15 @@ class ResourceUtilization(object):
             self.extend_makespan(finish_time)
         demands_array = np.expand_dims(demands, 1)
         self.utilization[:, start_time:finish_time] += demands_array
+
+    def remove(self, demands, start_time, finish_time):
+        # test if we can subtract?
+        demands_array = np.expand_dims(demands, 1)
+        result = self.utilization[:, start_time:finish_time] - demands_array
+        if not np.all(result >= 0):
+            raise KeyError("Cannot remove this demands.")
+        else:
+            self.utilization[:, start_time:finish_time] = result
 
     def extend_makespan(self, minimal_extend_time):
         if minimal_extend_time > self.max_makespan:

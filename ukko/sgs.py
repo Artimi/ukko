@@ -11,22 +11,13 @@ class SSGS(object):
     def get_schedule(self):
         for i in xrange(self.problem.num_activities):
             activity = self._select_activity()
-            if activity == 13:
-                activity
-            precedence_feasible_start = self._compute_earliest_start(activity)
+            precedence_feasible_start = self.S.earliest_precedence_start(activity)
             real_start = self._compute_real_start(activity, precedence_feasible_start)
             self.S.add(activity, real_start)
         return self.S
 
     def _select_activity(self):
         return self.S.eligible_activities.pop()
-
-    def _compute_earliest_start(self, activity):
-        max_finish_time_predecessors = 0
-        for predecessor in self.problem.predecessors(activity):
-            if max_finish_time_predecessors < self.S.finish_times_activities[predecessor]:
-                max_finish_time_predecessors = self.S.finish_times_activities[predecessor]
-        return max_finish_time_predecessors
 
     def _compute_real_start(self, activity, precedence_feasible_start):
         real_start = 0
