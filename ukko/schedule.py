@@ -122,7 +122,7 @@ class Schedule(object):
         flatui = ["#ffffff", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
         cmap = sns.blend_palette(flatui, as_cmap=True)
         sns.set_style("white")
-        plt.figure(figsize=(16, 12))
+        plt.figure(figsize=(7, 7))
         for index, res in enumerate(arrays):
             plt.subplot(self.problem.num_resources, 1, index + 1)
             plt.title('Resource #{0}'.format(index))
