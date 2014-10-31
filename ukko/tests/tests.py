@@ -61,6 +61,13 @@ class ActivityListTestCase(unittest.TestCase):
         wrong_order[0], wrong_order[1] = wrong_order[1], wrong_order[0]
         self.assertRaises(PrecedenceException, ActivityList, self.problem, wrong_order)
 
+    def test_generate_random(self):
+        al = ActivityList(self.problem).generate_random()
+        self.assertEqual(type(al), ActivityList)
+        al2 = ActivityList(self.problem).generate_random()
+        # this will probably hold False for most cases, probably
+        self.assertFalse(np.all(al._array == al2._array))
+
 
 class ScheduleTestCase(unittest.TestCase):
     def setUp(self):
@@ -91,7 +98,6 @@ class ScheduleTestCase(unittest.TestCase):
         self.schedule.remove(1)
         self.assertNotIn(1, self.schedule.start_times[0])
         self.assertNotIn(1, self.schedule.finish_times[self.problem_dict['activities']['duration'][1]])
-
 
     def test_can_place(self):
         self.assertFalse(self.schedule.can_place(1, 0))  # violated precedence 0->1
