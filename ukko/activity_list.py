@@ -42,3 +42,32 @@ class ActivityList(object):
                 if self.problem.contains_all_predecessors(assigned_activities, succ):
                     maystart.append(succ)
         return self
+
+    def shift(self, activity, direction, steps):
+        """
+        Shifts activity to direction with maximum steps.
+
+        :param activity:
+        :param direction: 1 right, -1 left
+        :param steps:
+        :return number of steps taken
+        """
+        index = np.where(self._array == activity)[0][0]
+        i = 0
+        for i in xrange(steps):
+            current_index = (index + i) * direction
+            try:
+                self._swap(current_index, current_index + direction)
+            except PrecedenceException:
+                break
+        else:
+            return i + 1
+        return i
+
+    def _swap(self, index1, index2):
+        lower_index = index1 if index1 < index2 else index2
+        higher_index = index1 if index1 > index2 else index2
+        if self._array[lower_index] not in self.problem.predecessors(self._array[higher_index]):
+            self._array[index1], self._array[index2] = self._array[index2], self._array[index1]
+        else:
+            raise PrecedenceException("This would break precedence condition.")
