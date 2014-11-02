@@ -6,6 +6,8 @@ from .utils import PrecedenceException
 
 
 class ActivityList(object):
+    RIGHT_SHIFT = 1
+    LEFT_SHIFT = -1
 
     def __init__(self, problem, array=None):
         self.problem = problem
@@ -21,6 +23,9 @@ class ActivityList(object):
 
     def __iter__(self):
         return self._array.__iter__()
+
+    def __str__(self):
+        return str(self._array)
 
     def is_precedence_feasible(self):
         act_previous = set()
@@ -44,18 +49,10 @@ class ActivityList(object):
         return self
 
     def shift(self, activity, direction, steps):
-        """
-        Shifts activity to direction with maximum steps.
-
-        :param activity:
-        :param direction: 1 right, -1 left
-        :param steps:
-        :return number of steps taken
-        """
         index = np.where(self._array == activity)[0][0]
         i = 0
         for i in xrange(steps):
-            current_index = (index + i) * direction
+            current_index = index + i * direction
             try:
                 self._swap(current_index, current_index + direction)
             except PrecedenceException:
@@ -70,4 +67,4 @@ class ActivityList(object):
         if self._array[lower_index] not in self.problem.predecessors(self._array[higher_index]):
             self._array[index1], self._array[index2] = self._array[index2], self._array[index1]
         else:
-            raise PrecedenceException("This would break precedence condition.")
+            raise PrecedenceException("Swap of {0} and {1} would break precedence condition.".format(self._array[lower_index], self._array[higher_index]))

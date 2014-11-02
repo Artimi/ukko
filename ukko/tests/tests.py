@@ -69,10 +69,11 @@ class ActivityListTestCase(unittest.TestCase):
         self.assertFalse(np.all(al._array == al2._array))
 
     def test_shift(self):
-        self.assertEqual(0, self.al.shift(0, 1, 1))
-        self.assertEqual(2, self.al.shift(1, 1, 2))  # normal swap
-        self.assertEqual(0, self.al.shift(1, 1, 1))  # precedence
-        self.assertEqual(5, self.al.shift(2, 1, 8))
+        self.assertEqual(0, self.al.shift(0, ActivityList.RIGHT_SHIFT, 1))
+        self.assertEqual(2, self.al.shift(1, ActivityList.RIGHT_SHIFT, 2))  # normal swap
+        self.assertEqual(0, self.al.shift(1, ActivityList.RIGHT_SHIFT, 1))  # precedence
+        self.assertEqual(5, self.al.shift(2, ActivityList.RIGHT_SHIFT, 8))
+        self.assertEqual(5, self.al.shift(2, ActivityList.LEFT_SHIFT, 5))
 
 
 class ScheduleTestCase(unittest.TestCase):
