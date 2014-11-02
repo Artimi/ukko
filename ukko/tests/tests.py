@@ -144,6 +144,15 @@ class ScheduleTestCase(unittest.TestCase):
         self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
         self.assertGreaterEqual(initial_makespan, self.schedule.makespan)  # makespan should be same or better
 
+    def test_serialize(self):
+        ssgs_al = SSGS_AL(self.problem, self.al)
+        self.schedule = ssgs_al.get_schedule()
+        al = self.schedule.serialize()
+        act1 = 0
+        for act2 in al[1:]:
+            self.assertLessEqual(self.schedule.start_times_activities[act1],
+                                 self.schedule.start_times_activities[act2])
+
 
 class ResourceUtilizationTestCase(unittest.TestCase):
     def setUp(self):

@@ -3,6 +3,7 @@
 from __future__ import division
 import math
 from utils import ConstraintException
+from activity_list import ActivityList
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -165,6 +166,15 @@ class Schedule(object):
             self.shift('right')
             self.shift('left')
             new_makespan = self.makespan
+
+    def serialize(self):
+        al = ActivityList(self.problem)
+        index = 0
+        for activities in self.start_times.values():
+            for activity in activities:
+                al[index] = activity
+                index += 1
+        return al
 
 
 class ResourceUtilization(object):

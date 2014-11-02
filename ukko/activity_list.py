@@ -21,6 +21,9 @@ class ActivityList(object):
     def __getitem__(self, item):
         return self._array[item]
 
+    def __setitem__(self, key, value):
+        self._array[key] = value
+
     def __iter__(self):
         return self._array.__iter__()
 
