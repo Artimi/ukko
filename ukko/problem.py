@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import igraph
-from utils import memoized
+from .utils import memoized
 
 
 class Problem(object):

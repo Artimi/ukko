@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import schedule
+from .schedule import Schedule
 
 
 class SSGS(object):
     def __init__(self, problem):
         self.problem = problem
-        self.S = schedule.Schedule(self.problem)
+        self.S = Schedule(self.problem)
 
     def get_schedule(self):
         for i in xrange(self.problem.num_activities):
