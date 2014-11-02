@@ -136,11 +136,11 @@ class ScheduleTestCase(unittest.TestCase):
         ssgs_al = SSGS_AL(self.problem, self.al)
         self.schedule = ssgs_al.get_schedule()
         initial_makespan = self.schedule.makespan
-        self.schedule.shift('right')
+        self.schedule.shift(Schedule.RIGHT_SHIFT)
         self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
-        self.schedule.shift('right')  # nothing should change
+        self.schedule.shift(Schedule.RIGHT_SHIFT)  # nothing should change
         self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
-        self.schedule.shift('left')
+        self.schedule.shift(Schedule.LEFT_SHIFT)
         self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
         self.assertGreaterEqual(initial_makespan, self.schedule.makespan)  # makespan should be same or better
 

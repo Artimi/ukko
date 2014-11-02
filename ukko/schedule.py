@@ -10,6 +10,8 @@ import seaborn as sns
 
 
 class Schedule(object):
+    RIGHT_SHIFT = 1
+    LEFT_SHIFT = -1
 
     def __init__(self, problem):
         self.problem = problem
@@ -140,19 +142,17 @@ class Schedule(object):
         self.plot()
         plt.savefig(file_name)
 
-    def shift(self, direction='right'):
-        if direction == 'right':
-            # from right to left
+    def shift(self, direction=RIGHT_SHIFT):
+        if direction == self.RIGHT_SHIFT:
             activity_list = sorted(self.start_times.items(), reverse=True)
-        elif direction == 'left':
-            # from left to right
+        elif direction == self.LEFT_SHIFT:
             activity_list = sorted(self.start_times.items())
         for start_time, activities in activity_list:
             for activity in activities:
                 self.remove(activity)
-                if direction == 'right':
+                if direction == self.RIGHT_SHIFT:
                     time_list = xrange(self.latest_precedence_start(activity), start_time - 1, -1)
-                elif direction == 'left':
+                elif direction == self.LEFT_SHIFT:
                     time_list = xrange(self.earliest_precedence_start(activity), start_time + 1)
                 for t in time_list:
                     if self.can_place(activity, t):
@@ -163,8 +163,8 @@ class Schedule(object):
         makespan = self.makespan
         new_makespan = 0
         while new_makespan < makespan:
-            self.shift('right')
-            self.shift('left')
+            self.shift(self.RIGHT_SHIFT)
+            self.shift(self.LEFT_SHIFT)
             new_makespan = self.makespan
 
     def serialize(self):
