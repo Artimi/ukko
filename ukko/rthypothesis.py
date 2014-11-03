@@ -28,6 +28,14 @@ class RTHypothesis(object):
         elif self.characteristic == self.SLT:
             self._update_SLT(schedule)
 
+    def get_excluding(self):
+        result = []
+        max_time = self._array[self._array < self.INFINITY].max()
+        activities = np.argwhere(self._array == max_time)
+        for couple in activities:
+            result.append(tuple(couple))
+        return result
+
     def _update_PSE(self, schedule):
         makespan = schedule.makespan
         for activities in schedule.start_times.values():

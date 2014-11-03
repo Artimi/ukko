@@ -246,3 +246,9 @@ class RTHypothesisTestCase(unittest.TestCase):
         rt.update(self.schedule_better)
         self.assertLess(self.schedule_better.makespan, self.schedule.makespan)
         self.assertEqual(rt[1, 8], self.schedule_better.makespan)
+
+    def test_excluding(self):
+        rt = RTHypothesis(self.problem, RTHypothesis.PSE)
+        rt.update(self.schedule)
+        rt.update(self.schedule_better)
+        self.assertIn((0, 1), rt.get_excluding())
