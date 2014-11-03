@@ -2,7 +2,7 @@ import unittest
 import nose
 
 import numpy as np
-from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, SSGS_AL
+from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, SSGS_AL, RTHypothesis
 from ukko.utils import PrecedenceException
 
 TEST_FILE = '../../psplib/j30rcp/J301_1.RCP'
@@ -204,3 +204,51 @@ class SSGSTestCase(unittest.TestCase):
         ssgs_al = SSGS_AL(self.problem, al)
         schedule = ssgs_al.get_schedule()
         self.assertEqual(len(schedule.scheduled_activities), self.problem.num_activities)
+
+
+class RTHypothesisTestCase(unittest.TestCase):
+    def setUp(self):
+        parser = RCPParser()
+        self.problem_dict = parser(TEST_FILE)
+        self.problem = Problem(self.problem_dict)
+        self.activities_order = [0, 1, 2, 3, 5, 10, 14, 6, 7, 12, 4, 8, 9, 25, 11, 18, 26,
+                                 17, 15, 13, 28, 19, 20, 16, 24, 27, 21, 30, 22, 23, 29, 31]
+        self.al = ActivityList(self.problem, self.activities_order)
+        ssgs_al = SSGS_AL(self.problem, self.al)
+        self.schedule = ssgs_al.get_schedule()
+        self.activities_order_better = [0,  2,  3, 12,  7,  6,  9,  1,  4, 17,  8, 15, 11, 18, 26, 10, 28,
+                                        14,  5, 13, 25, 19, 16, 21, 20, 27, 22, 24, 23, 30, 29, 31]
+        self.al_better = ActivityList(self.problem, self.activities_order_better)
+        ssgs_al_better = SSGS_AL(self.problem, self.al_better)
+        self.schedule_better = ssgs_al_better.get_schedule()
+
+    def test_PSE(self):
+        rt = RTHypothesis(self.problem, RTHypothesis.PSE)
+        rt.update(self.schedule)
+        self.assertEqual(rt[0, 3], self.schedule.makespan)
+        self.assertEqual(rt[0, 1], self.schedule.makespan)
+        rt.update(self.schedule_better)
+        self.assertLess(self.schedule_better.makespan, self.schedule.makespan)
+        self.assertEqual(rt[0, 3], self.schedule_better.makespan)
+        self.assertEqual(rt[0, 1], self.schedule.makespan)
+
+    def test_FLE(self):
+        rt = RTHypothesis(self.problem, RTHypothesis.FLE)
+        rt.update(self.schedule)
+        self.assertEqual(rt[1, 8], self.schedule.makespan)
+        self.assertEqual(rt[8, 1], self.schedule.makespan)
+        self.assertEqual(rt[8, 8], self.schedule.makespan)
+        rt.update(self.schedule_better)
+        self.assertLess(self.schedule_better.makespan, self.schedule.makespan)
+        self.assertEqual(rt[1, 8], self.schedule_better.makespan)
+        self.assertEqual(rt[8, 1], self.schedule.makespan)
+        self.assertEqual(rt[8, 8], self.schedule_better.makespan)
+
+    def test_SLT(self):
+        rt = RTHypothesis(self.problem, RTHypothesis.SLT)
+        rt.update(self.schedule)
+        self.assertEqual(rt[1, 8], self.schedule.makespan)
+        self.assertEqual(rt[8, 1], RTHypothesis.INFINITY)
+        rt.update(self.schedule_better)
+        self.assertLess(self.schedule_better.makespan, self.schedule.makespan)
+        self.assertEqual(rt[1, 8], self.schedule_better.makespan)
