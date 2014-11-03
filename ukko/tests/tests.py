@@ -2,7 +2,7 @@ import unittest
 import nose
 
 import numpy as np
-from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, SSGS_AL, RTHypothesis
+from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, RTHypothesis
 from ukko.utils import PrecedenceException
 
 TEST_FILE = '../../psplib/j30rcp/J301_1.RCP'
@@ -133,8 +133,8 @@ class ScheduleTestCase(unittest.TestCase):
         self.assertEqual(self.schedule.earliest_precedence_start(5), 8)
 
     def test_shift(self):
-        ssgs_al = SSGS_AL(self.problem, self.al)
-        self.schedule = ssgs_al.get_schedule()
+        ssgs = SSGS(self.problem)
+        self.schedule = ssgs.get_schedule(self.al)
         initial_makespan = self.schedule.makespan
         self.schedule.shift(Schedule.RIGHT_SHIFT)
         self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
@@ -145,8 +145,8 @@ class ScheduleTestCase(unittest.TestCase):
         self.assertGreaterEqual(initial_makespan, self.schedule.makespan)  # makespan should be same or better
 
     def test_serialize(self):
-        ssgs_al = SSGS_AL(self.problem, self.al)
-        self.schedule = ssgs_al.get_schedule()
+        ssgs = SSGS(self.problem)
+        self.schedule = ssgs.get_schedule(self.al)
         al = self.schedule.serialize()
         act1 = 0
         for act2 in al[1:]:
@@ -192,17 +192,12 @@ class SSGSTestCase(unittest.TestCase):
         self.problem_dict = parser(TEST_FILE)
         self.problem = Problem(self.problem_dict)
 
-    def test_basic(self):
-        ssgs = SSGS(self.problem)
-        schedule = ssgs.get_schedule()
-        self.assertEqual(len(schedule.scheduled_activities), self.problem.num_activities)
-
     def test_al(self):
         activities_order = [0, 2, 1, 3, 5, 10, 14, 6, 7, 12, 4, 8, 9, 25, 11, 18, 26,
                             17, 15, 13, 28, 19, 20, 16, 24, 27, 21, 30, 22, 23, 29, 31]
         al = ActivityList(self.problem, activities_order)
-        ssgs_al = SSGS_AL(self.problem, al)
-        schedule = ssgs_al.get_schedule()
+        ssgs = SSGS(self.problem)
+        schedule = ssgs.get_schedule(al)
         self.assertEqual(len(schedule.scheduled_activities), self.problem.num_activities)
 
 
@@ -214,13 +209,12 @@ class RTHypothesisTestCase(unittest.TestCase):
         self.activities_order = [0, 1, 2, 3, 5, 10, 14, 6, 7, 12, 4, 8, 9, 25, 11, 18, 26,
                                  17, 15, 13, 28, 19, 20, 16, 24, 27, 21, 30, 22, 23, 29, 31]
         self.al = ActivityList(self.problem, self.activities_order)
-        ssgs_al = SSGS_AL(self.problem, self.al)
-        self.schedule = ssgs_al.get_schedule()
+        ssgs = SSGS(self.problem)
+        self.schedule = ssgs.get_schedule(self.al)
         self.activities_order_better = [0,  2,  3, 12,  7,  6,  9,  1,  4, 17,  8, 15, 11, 18, 26, 10, 28,
                                         14,  5, 13, 25, 19, 16, 21, 20, 27, 22, 24, 23, 30, 29, 31]
         self.al_better = ActivityList(self.problem, self.activities_order_better)
-        ssgs_al_better = SSGS_AL(self.problem, self.al_better)
-        self.schedule_better = ssgs_al_better.get_schedule()
+        self.schedule_better = ssgs.get_schedule(self.al_better)
 
     def test_PSE(self):
         rt = RTHypothesis(self.problem, RTHypothesis.PSE)
