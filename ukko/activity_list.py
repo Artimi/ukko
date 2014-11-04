@@ -56,8 +56,12 @@ class ActivityList(object):
         i = 0
         for i in xrange(steps):
             current_index = index + i * direction
+            next_index = current_index + direction
             try:
-                self._swap(current_index, current_index + direction)
+                if next_index < self.problem.num_activities:
+                    self._swap(current_index, current_index + direction)
+                else:
+                    break
             except PrecedenceException:
                 break
         else:

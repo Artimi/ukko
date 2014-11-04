@@ -63,8 +63,11 @@ class Schedule(object):
     def earliest_precedence_start(self, activity):
         max_finish_time_predecessors = 0
         for predecessor in self.problem.predecessors(activity):
-            if max_finish_time_predecessors < self.finish_times_activities[predecessor]:
-                max_finish_time_predecessors = self.finish_times_activities[predecessor]
+            try:
+                if max_finish_time_predecessors < self.finish_times_activities[predecessor]:
+                    max_finish_time_predecessors = self.finish_times_activities[predecessor]
+            except KeyError:
+                pass
         return max_finish_time_predecessors
 
     def latest_precedence_start(self, activity):
@@ -149,6 +152,8 @@ class Schedule(object):
             activity_list = sorted(self.start_times.items())
         for start_time, activities in activity_list:
             for activity in activities:
+                if activity == 0:
+                    continue
                 self.remove(activity)
                 if direction == self.RIGHT_SHIFT:
                     time_list = xrange(self.latest_precedence_start(activity), start_time - 1, -1)
@@ -170,7 +175,7 @@ class Schedule(object):
     def serialize(self):
         al = ActivityList(self.problem)
         index = 0
-        for activities in self.start_times.values():
+        for t, activities in sorted(self.start_times.items()):
             for activity in activities:
                 al[index] = activity
                 index += 1

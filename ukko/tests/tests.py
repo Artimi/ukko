@@ -40,6 +40,7 @@ class ProblemTestCase(unittest.TestCase):
         self.assertEqual(self.problem.num_activities, self.problem_dict['num_activities'])
 
     def test_predecessor_all(self):
+        self.assertSetEqual({0}, self.problem.predecessors_all(1))
         self.assertSetEqual({0, 3}, self.problem.predecessors_all(8))
         self.assertSetEqual(set(range(31)), self.problem.predecessors_all(31))
         self.assertSetEqual({0, 2, 3, 7, 8, 11}, self.problem.predecessors_all(13))
@@ -76,6 +77,7 @@ class ActivityListTestCase(unittest.TestCase):
         al2 = ActivityList(self.problem).generate_random()
         # this will probably hold False for most cases, probably
         self.assertFalse(np.all(al._array == al2._array))
+        self.assertTrue(al.is_precedence_feasible())
 
     def test_shift(self):
         self.assertEqual(0, self.al.shift(0, ActivityList.RIGHT_SHIFT, 1))
@@ -166,6 +168,13 @@ class ScheduleTestCase(unittest.TestCase):
         for act2 in al[1:]:
             self.assertLessEqual(self.schedule.start_times_activities[act1],
                                  self.schedule.start_times_activities[act2])
+        self.assertTrue(al.is_precedence_feasible())
+        self.schedule.shift(Schedule.RIGHT_SHIFT)
+        al_shifted = self.schedule.serialize()
+        self.assertTrue(al_shifted.is_precedence_feasible())
+        self.schedule.shift(Schedule.LEFT_SHIFT)
+        al_shifted = self.schedule.serialize()
+        self.assertTrue(al_shifted.is_precedence_feasible())
 
 
 class ResourceUtilizationTestCase(unittest.TestCase):
@@ -289,4 +298,19 @@ class RTSystemTestCase(unittest.TestCase):
         rt.update(self.schedule)
         rt.update(self.schedule_better)
         self.assertGreater(len(rt.get_excluding_activities()), 0)
+
+
+class GARTHTestCase(unittest.TestCase):
+    def setUp(self):
+        parser = RCPParser()
+        self.problem_dict = parser(TEST_FILE)
+        self.problem = Problem(self.problem_dict)
+
+    def test_step(self):
+        g = GARTH(self.problem)
+        g.step()
+
+    def test_run(self):
+        g = GARTH(self.problem)
+        g.run()
 
