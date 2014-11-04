@@ -45,8 +45,11 @@ class ActivityListTestCase(unittest.TestCase):
         self.problem_dict = parser(TEST_FILE)
         self.problem = Problem(self.problem_dict)
         self.activities_order = [0, 1, 2, 3, 5, 10, 14, 6, 7, 12, 4, 8, 9, 25, 11, 18, 26,
-                      17, 15, 13, 28, 19, 20, 16, 24, 27, 21, 30, 22, 23, 29, 31]
+                                 17, 15, 13, 28, 19, 20, 16, 24, 27, 21, 30, 22, 23, 29, 31]
         self.al = ActivityList(self.problem, self.activities_order)
+        self.activities_order_better = [0,  2,  3, 12,  7,  6,  9,  1,  4, 17,  8, 15, 11, 18, 26, 10, 28,
+                                        14,  5, 13, 25, 19, 16, 21, 20, 27, 22, 24, 23, 30, 29, 31]
+        self.al_better = ActivityList(self.problem, self.activities_order_better)
 
     def test_get_item(self):
         self.assertEqual(self.al[4], 5)
@@ -74,6 +77,10 @@ class ActivityListTestCase(unittest.TestCase):
         self.assertEqual(0, self.al.shift(1, ActivityList.RIGHT_SHIFT, 1))  # precedence
         self.assertEqual(5, self.al.shift(2, ActivityList.RIGHT_SHIFT, 8))
         self.assertEqual(5, self.al.shift(2, ActivityList.LEFT_SHIFT, 5))
+
+    def test_crossover(self):
+        child = self.al.crossover(self.al_better, 10, 20)
+        self.assertTrue(child.is_precedence_feasible())
 
 
 class ScheduleTestCase(unittest.TestCase):

@@ -71,3 +71,18 @@ class ActivityList(object):
             self._array[index1], self._array[index2] = self._array[index2], self._array[index1]
         else:
             raise PrecedenceException("Swap of {0} and {1} would break precedence condition.".format(self._array[lower_index], self._array[higher_index]))
+
+    def crossover(self, other, c1, c2):
+        child = ActivityList(self.problem)
+        child[:c1] = self[:c1]
+        index = c1
+        for act in other:
+            if act not in child[:c1]:
+                child[index] = act
+                index += 1
+        index = c2
+        for act in self[c1:]:
+            if act not in child[:c2]:
+                child[index] = act
+                index += 1
+        return child
