@@ -67,7 +67,7 @@ class ActivityList(object):
     def _swap(self, index1, index2):
         lower_index = index1 if index1 < index2 else index2
         higher_index = index1 if index1 > index2 else index2
-        if self._array[lower_index] not in self.problem.predecessors(self._array[higher_index]):
+        if self._array[lower_index] not in self.problem.predecessors_all(self._array[higher_index]):
             self._array[index1], self._array[index2] = self._array[index2], self._array[index1]
         else:
             raise PrecedenceException("Swap of {0} and {1} would break precedence condition.".format(self._array[lower_index], self._array[higher_index]))

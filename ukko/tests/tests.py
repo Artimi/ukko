@@ -4,6 +4,7 @@ import nose
 import numpy as np
 from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, RTHypothesis, RTSystem
 from ukko.utils import PrecedenceException
+from ukko.algorithms import GARTH
 
 TEST_FILE = '../../psplib/j30rcp/J301_1.RCP'
 
@@ -37,6 +38,11 @@ class ProblemTestCase(unittest.TestCase):
 
     def test_dict_class(self):
         self.assertEqual(self.problem.num_activities, self.problem_dict['num_activities'])
+
+    def test_predecessor_all(self):
+        self.assertSetEqual({0, 3}, self.problem.predecessors_all(8))
+        self.assertSetEqual(set(range(31)), self.problem.predecessors_all(31))
+        self.assertSetEqual({0, 2, 3, 7, 8, 11}, self.problem.predecessors_all(13))
 
 
 class ActivityListTestCase(unittest.TestCase):
@@ -77,6 +83,7 @@ class ActivityListTestCase(unittest.TestCase):
         self.assertEqual(0, self.al.shift(1, ActivityList.RIGHT_SHIFT, 1))  # precedence
         self.assertEqual(5, self.al.shift(2, ActivityList.RIGHT_SHIFT, 8))
         self.assertEqual(5, self.al.shift(2, ActivityList.LEFT_SHIFT, 5))
+        self.assertEqual(0, self.al.shift(31, ActivityList.LEFT_SHIFT, 31))
 
     def test_crossover(self):
         child = self.al.crossover(self.al_better, 10, 20)
