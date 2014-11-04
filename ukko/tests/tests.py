@@ -2,7 +2,7 @@ import unittest
 import nose
 
 import numpy as np
-from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, RTHypothesis
+from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, RTHypothesis, RTSystem
 from ukko.utils import PrecedenceException
 
 TEST_FILE = '../../psplib/j30rcp/J301_1.RCP'
@@ -252,3 +252,27 @@ class RTHypothesisTestCase(unittest.TestCase):
         rt.update(self.schedule)
         rt.update(self.schedule_better)
         self.assertIn((0, 1), rt.get_excluding())
+
+
+class RTSystemTestCase(unittest.TestCase):
+
+    def setUp(self):
+        parser = RCPParser()
+        self.problem_dict = parser(TEST_FILE)
+        self.problem = Problem(self.problem_dict)
+        self.activities_order = [0, 1, 2, 3, 5, 10, 14, 6, 7, 12, 4, 8, 9, 25, 11, 18, 26,
+                                 17, 15, 13, 28, 19, 20, 16, 24, 27, 21, 30, 22, 23, 29, 31]
+        self.al = ActivityList(self.problem, self.activities_order)
+        ssgs = SSGS(self.problem)
+        self.schedule = ssgs.get_schedule(self.al)
+        self.activities_order_better = [0,  2,  3, 12,  7,  6,  9,  1,  4, 17,  8, 15, 11, 18, 26, 10, 28,
+                                        14,  5, 13, 25, 19, 16, 21, 20, 27, 22, 24, 23, 30, 29, 31]
+        self.al_better = ActivityList(self.problem, self.activities_order_better)
+        self.schedule_better = ssgs.get_schedule(self.al_better)
+
+    def test_update(self):
+        rt = RTSystem(self.problem)
+        rt.update(self.schedule)
+        rt.update(self.schedule_better)
+        self.assertGreater(len(rt.get_excluding_activities()), 0)
+

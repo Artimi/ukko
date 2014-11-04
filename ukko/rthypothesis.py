@@ -60,3 +60,26 @@ class RTHypothesis(object):
                 if self._array[couple] > makespan:
                     self._array[couple] = makespan
             previous_activities.update(activities)
+
+
+class RTSystem(object):
+
+    def __init__(self, problem, characteristics=(RTHypothesis.PSE, RTHypothesis.FLE, RTHypothesis.SLT)):
+        self.problem = problem
+        self.characteristics = characteristics
+        self._rts = []
+        for ch in self.characteristics:
+            self._rts.append(RTHypothesis(self.problem, ch))
+
+    def get_excluding_activities(self):
+        result = set()
+        for rt in self._rts:
+            for couple in rt.get_excluding():
+                result.update(couple)
+        return result
+
+    def update(self, schedule):
+        for rt in self._rts:
+            rt.update(schedule)
+
+
