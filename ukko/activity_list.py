@@ -2,7 +2,7 @@
 
 import numpy as np
 import random
-from .utils import PrecedenceException
+from utils import PrecedenceException
 
 
 class ActivityList(object):

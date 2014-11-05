@@ -2,9 +2,8 @@ import unittest
 import nose
 
 import numpy as np
-from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, RTHypothesis, RTSystem
+from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, RTHypothesis, RTSystem, GARTH
 from ukko.utils import PrecedenceException
-from ukko.algorithms import GARTH
 
 TEST_FILE = '../../psplib/j30rcp/J301_1.RCP'
 
@@ -300,17 +299,17 @@ class RTSystemTestCase(unittest.TestCase):
         self.assertGreater(len(rt.get_excluding_activities()), 0)
 
 
-class GARTHTestCase(unittest.TestCase):
-    def setUp(self):
-        parser = RCPParser()
-        self.problem_dict = parser(TEST_FILE)
-        self.problem = Problem(self.problem_dict)
-
-    def test_step(self):
-        g = GARTH(self.problem)
-        g.step()
-
-    def test_run(self):
-        g = GARTH(self.problem)
-        g.run()
+# class GARTHTestCase(unittest.TestCase):
+#     def setUp(self):
+#         parser = RCPParser()
+#         self.problem_dict = parser(TEST_FILE)
+#         self.problem = Problem(self.problem_dict)
+#
+#     def test_step(self):
+#         g = GARTH(self.problem)
+#         g.step()
+#
+#     def test_run(self):
+#         g = GARTH(self.problem)
+#         g.run()
 

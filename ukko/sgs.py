@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .schedule import Schedule
+from schedule import Schedule
 
 
 class SSGS(object):

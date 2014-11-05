@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from ukko import ActivityList, SSGS, Schedule, RTSystem
+from activity_list import ActivityList
+from sgs import SSGS
+from schedule import Schedule
+from rthypothesis import RTSystem
+
 import numpy as np
 import random
 
