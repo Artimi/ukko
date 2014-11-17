@@ -1,11 +1,13 @@
 import unittest
 import nose
+import os.path
 
 import numpy as np
 from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, RTHypothesis, RTSystem, GARTH
 from ukko.utils import PrecedenceException
 
-TEST_FILE = '../../psplib/j30rcp/J301_1.RCP'
+PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '../')
+TEST_FILE = PROJECT_ROOT + 'psplib/j30rcp/J301_1.RCP'
 
 
 class ParserTestCase(unittest.TestCase):
