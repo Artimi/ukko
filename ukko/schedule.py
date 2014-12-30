@@ -123,12 +123,12 @@ class Schedule(object):
                         activity_corner[res][activity] = (time, res_offset)
         return arrays, activity_corner
 
-    def plot(self):
+    def plot(self, figsize=(7,7)):
         arrays, activity_corner = self.array_representation()
         flatui = ["#ffffff", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
         cmap = sns.blend_palette(flatui, as_cmap=True)
         sns.set_style("white")
-        plt.figure(figsize=(7, 7))
+        plt.figure(figsize=figsize)
         for index, res in enumerate(arrays):
             plt.subplot(self.problem.num_resources, 1, index + 1)
             plt.title('Resource #{0}'.format(index))
@@ -141,8 +141,8 @@ class Schedule(object):
         plt.tight_layout()
         plt.plot()
 
-    def save_plot(self, file_name):
-        self.plot()
+    def save_plot(self, file_name, figsize=(7,7)):
+        self.plot(figsize=figsize)
         plt.savefig(file_name)
 
     def shift(self, direction=RIGHT_SHIFT):
