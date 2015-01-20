@@ -61,6 +61,17 @@ class RTHypothesis(object):
                     self._array[couple] = makespan
             previous_activities.update(activities)
 
+    def __str__(self):
+        if self.characteristic == self.PSE:
+            characteristic = 'PSE'
+        elif self.characteristic == self.FLE:
+            characteristic = 'FLE'
+        elif self.characteristic == self.SLT:
+            characteristic = 'SLT'
+        copy_array = self._array.copy()
+        copy_array[copy_array == self.INFINITY] = 0
+        return characteristic + '\n' + str(copy_array)
+
 
 class RTSystem(object):
 
@@ -81,5 +92,8 @@ class RTSystem(object):
     def update(self, schedule):
         for rt in self._rts:
             rt.update(schedule)
+
+    def __str__(self):
+        return '\n'.join(map(str, self._rts))
 
 
