@@ -2,6 +2,7 @@
 
 import igraph
 from utils import memoized
+import numpy as np
 
 
 class Problem(object):
@@ -58,4 +59,4 @@ class Problem(object):
         return self.activities['duration'][activity]
 
     def demands(self, activity):
-        return self.activities['res_demands'][:, activity]
+        return self.activities['res_demands'][:, activity, np.newaxis]

@@ -17,7 +17,7 @@ def main():
     rcpparser = RCPParser()
     problem_dict = rcpparser(args.rcp_file)
     problem = Problem(problem_dict)
-    params = {'popSize': 10,
+    params = {'popSize': 100,
                    'Rcopy': 0.1,
                    'Rnew': 0.0,
                    'Rmut': 0.2,

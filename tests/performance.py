@@ -16,8 +16,5 @@ class GARTHTestCase(unittest.TestCase):
         self.problem = Problem(self.problem_dict)
         self.g = GARTH(self.problem)
 
-    def test_init(self):
-        g = GARTH(self.problem)
-
     def test_step(self):
         self.g.step()

@@ -6,7 +6,6 @@ from utils import ConstraintException
 from activity_list import ActivityList
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 class Schedule(object):
@@ -80,11 +79,11 @@ class Schedule(object):
 
     def _finished_activities(self, time):
         result = set()
-        for t in xrange(time + 1):
-            try:
-                result.update(self.finish_times[t])
-            except KeyError:
-                pass
+        keys = sorted(self.finish_times.keys())
+        for t in keys:
+            if t > time:
+                break
+            result.update(self.finish_times[t])
         return result
 
     @property
@@ -124,6 +123,7 @@ class Schedule(object):
         return arrays, activity_corner
 
     def plot(self, figsize=(7,7)):
+        import seaborn as sns
         arrays, activity_corner = self.array_representation()
         flatui = ["#ffffff", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
         cmap = sns.blend_palette(flatui, as_cmap=True)
@@ -191,13 +191,11 @@ class ResourceUtilization(object):
     def add(self, demands, start_time, finish_time):
         if finish_time > self.max_makespan:
             self.extend_makespan(finish_time)
-        demands_array = np.expand_dims(demands, 1)
-        self.utilization[:, start_time:finish_time] += demands_array
+        self.utilization[:, start_time:finish_time] += demands
 
     def remove(self, demands, start_time, finish_time):
         # test if we can subtract?
-        demands_array = np.expand_dims(demands, 1)
-        result = self.utilization[:, start_time:finish_time] - demands_array
+        result = self.utilization[:, start_time:finish_time] - demands
         if not np.all(result >= 0):
             raise KeyError("Cannot remove this demands.")
         else:
@@ -217,8 +215,4 @@ class ResourceUtilization(object):
         return self.problem.res_constraints[resource] - self.get(resource, time)
 
     def is_free(self, demands, start_time, finish_time):
-        if demands.shape != self.problem.res_constraints.shape:
-            demands_array = np.expand_dims(demands, 1)
-        else:
-            demands_array = demands
-        return np.all(self.utilization[:, start_time:finish_time] + demands_array <= self.problem.res_constraints)
+        return np.all(self.utilization[:, start_time:finish_time] + demands <= self.problem.res_constraints)

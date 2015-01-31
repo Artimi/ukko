@@ -186,25 +186,25 @@ class ResourceUtilizationTestCase(unittest.TestCase):
         self.ru = ResourceUtilization(self.problem, max_makespan=16)
 
     def test_add(self):
-        self.ru.add([4, 0, 0, 0], 0, 8)
+        self.ru.add(np.array([[4, 0, 0, 0]]).T, 0, 8)
         self.assertEqual(self.ru.get(0, 0), 4)
         self.assertEqual(self.ru.get(0, 7), 4)
         self.assertEqual(self.ru.get(0, 8), 0)
         self.assertEqual(self.ru.get(0, 9), 0)
 
     def test_remove(self):
-        self.assertRaises(KeyError, self.ru.remove, [1, 1, 1, 1], 0, 8)
-        self.ru.add([4, 0, 0, 0], 0, 8)
-        self.ru.remove([4, 0, 0, 0], 0, 8)
+        self.assertRaises(KeyError, self.ru.remove, np.array([[1, 1, 1, 1]]).T, 0, 8)
+        self.ru.add(np.array([[4, 0, 0, 0]]).T, 0, 8)
+        self.ru.remove(np.array([[4, 0, 0, 0]]).T, 0, 8)
         self.assertEqual(self.ru.get(0, 0), 0)
         self.assertEqual(self.ru.get(0, 8), 0)
 
     def test_extend(self):
-        self.ru.add([4, 0, 0, 0], 16, 18)
+        self.ru.add(np.array([[4, 0, 0, 0]]).T, 16, 18)
         self.assertGreaterEqual(self.ru.max_makespan, 18)
 
     def test_free(self):
-        res_constraints = np.array([12, 13, 4, 12], dtype=int)
+        res_constraints = np.array([[12, 13, 4, 12]], dtype=int).T
         self.assertTrue(self.ru.is_free(res_constraints, 0, 5))
         self.ru.add(res_constraints, 0, 5)
         self.assertFalse(self.ru.is_free(np.array([1, 1, 1, 1], ndmin=2).T, 4, 6))
