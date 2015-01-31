@@ -156,10 +156,15 @@ class Schedule(object):
                 if activity == 0:
                     continue
                 self.remove(activity)
+                activity_starts = set(self.start_times.keys())
                 if direction == self.RIGHT_SHIFT:
-                    time_list = xrange(self.latest_precedence_start(activity), start_time - 1, -1)
+                    times = set(range(start_time, self.latest_precedence_start(activity) + 1))
+                    times = times.intersection(activity_starts)
+                    time_list = sorted(times, reverse=True)
                 elif direction == self.LEFT_SHIFT:
-                    time_list = xrange(self.earliest_precedence_start(activity), start_time + 1)
+                    times = set(range(self.earliest_precedence_start(activity), start_time + 1))
+                    times = times.intersection(activity_starts)
+                    time_list = sorted(times)
                 for t in time_list:
                     if self.can_place(activity, t):
                         self.add(activity, t, force=True)
