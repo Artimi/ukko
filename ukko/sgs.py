@@ -14,7 +14,7 @@ class SSGS(object):
             activity = self._select_activity()
             precedence_feasible_start = S.earliest_precedence_start(activity)
             real_start = self._compute_real_start(S, activity, precedence_feasible_start)
-            S.add(activity, real_start)
+            S.add(activity, real_start, force=True)
         return S
 
     def _select_activity(self):

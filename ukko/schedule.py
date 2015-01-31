@@ -5,7 +5,6 @@ import math
 from utils import ConstraintException
 from activity_list import ActivityList
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 class Schedule(object):
@@ -27,9 +26,9 @@ class Schedule(object):
         except KeyError:
             l[time] = [activity]
 
-    def add(self, activity, start_time):
+    def add(self, activity, start_time, force=False):
         finish_time = start_time + self.problem.duration(activity)
-        if self.can_place(activity, start_time):
+        if force or self.can_place(activity, start_time):
             self._add_to_list(activity, self.start_times, start_time)
             self._add_to_list(activity, self.finish_times, finish_time)
             self.res_utilization.add(self.problem.demands(activity), start_time, finish_time)
@@ -124,6 +123,7 @@ class Schedule(object):
 
     def plot(self, figsize=(7,7)):
         import seaborn as sns
+        import matplotlib.pyplot as plt
         arrays, activity_corner = self.array_representation()
         flatui = ["#ffffff", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
         cmap = sns.blend_palette(flatui, as_cmap=True)
@@ -142,6 +142,7 @@ class Schedule(object):
         plt.plot()
 
     def save_plot(self, file_name, figsize=(7,7)):
+        import matplotlib.pyplot as plt
         self.plot(figsize=figsize)
         plt.savefig(file_name)
 
@@ -161,7 +162,7 @@ class Schedule(object):
                     time_list = xrange(self.earliest_precedence_start(activity), start_time + 1)
                 for t in time_list:
                     if self.can_place(activity, t):
-                        self.add(activity, t)
+                        self.add(activity, t, force=True)
                         break
 
     def double_justification(self):
@@ -194,12 +195,7 @@ class ResourceUtilization(object):
         self.utilization[:, start_time:finish_time] += demands
 
     def remove(self, demands, start_time, finish_time):
-        # test if we can subtract?
-        result = self.utilization[:, start_time:finish_time] - demands
-        if not np.all(result >= 0):
-            raise KeyError("Cannot remove this demands.")
-        else:
-            self.utilization[:, start_time:finish_time] = result
+        self.utilization[:, start_time:finish_time] = self.utilization[:, start_time:finish_time] - demands
 
     def extend_makespan(self, minimal_extend_time):
         if minimal_extend_time > self.max_makespan:
