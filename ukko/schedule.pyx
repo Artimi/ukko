@@ -5,6 +5,11 @@ import math
 from utils import ConstraintException
 from activity_list import ActivityList
 import numpy as np
+cimport numpy as np
+
+DTYPE = int
+# ctypedef int_t DTYPE_t
+
 
 
 class Schedule(object):
@@ -15,7 +20,7 @@ class Schedule(object):
         self.problem = problem
         self.start_times = dict()
         self.finish_times = dict()
-        self.res_utilization = ResourceUtilization(problem)
+        self.res_utilization = ResourceUtilization(problem.num_resources, problem.res_constraints)
         self.scheduled_activities = set()
         self.finish_times_activities = dict()
         self.start_times_activities = dict()
@@ -148,7 +153,10 @@ class Schedule(object):
         self.plot(figsize=figsize)
         plt.savefig(file_name)
 
-    def shift(self, direction=RIGHT_SHIFT):
+    def shift(self, int direction=RIGHT_SHIFT):
+        cdef int activity
+        cdef int start_time
+        cdef int t
         if direction == self.RIGHT_SHIFT:
             activity_list = sorted(self.start_times.items(), reverse=True)
         elif direction == self.LEFT_SHIFT:
@@ -190,32 +198,46 @@ class Schedule(object):
         return al
 
 
-class ResourceUtilization(object):
-    def __init__(self, problem, max_makespan=16):
-        self.problem = problem
-        self.max_makespan = max_makespan
-        self.utilization = np.zeros([self.problem.num_resources, max_makespan], dtype=int)
+class ResourceUtilization:
+    # cdef int num_resources
+    # cdef int[:, :] res_constraints
+    # cdef int max_makespan
+    # cdef int[:, :] utilization
 
-    def add(self, demands, start_time, finish_time):
-        if finish_time > self.max_makespan:
+    def __init__(self, int num_resources, np.ndarray[int, ndim=2] res_constraints, int max_makespan=16):
+        self.num_resources = num_resources
+        self.res_constraints = res_constraints
+        self.max_makespan = max_makespan
+        self.utilization = np.zeros([self.num_resources, max_makespan], dtype=DTYPE)
+
+    def add(self, np.ndarray[int, ndim=2] demands, int start_time, int finish_time):
+        cdef int max_makespan
+        max_makespan = self.max_makespan
+        if finish_time > max_makespan:
             self.extend_makespan(finish_time)
         self.utilization[:, start_time:finish_time] += demands
 
-    def remove(self, demands, start_time, finish_time):
+    def remove(self, np.ndarray[int, ndim=2] demands, int start_time, int finish_time):
         self.utilization[:, start_time:finish_time] = self.utilization[:, start_time:finish_time] - demands
 
-    def extend_makespan(self, minimal_extend_time):
+    def extend_makespan(self, int minimal_extend_time):
         if minimal_extend_time > self.max_makespan:
             difference = self.max_makespan * math.floor(minimal_extend_time / self.max_makespan)
-            extension = np.zeros([self.problem.num_resources, difference], dtype=int)
+            extension = np.zeros([self.num_resources, difference], dtype=int)
             self.utilization = np.hstack((self.utilization, extension))
             self.max_makespan += difference
 
-    def get(self, resource, time):
+    def get(self, int resource, int time):
         return self.utilization[resource][time]
 
-    def get_capacity(self, resource, time):
-        return self.problem.res_constraints[resource] - self.get(resource, time)
+    def get_capacity(self, int resource, int time):
+        return self.res_constraints[resource] - self.get(resource, time)
 
-    def is_free(self, demands, start_time, finish_time):
-        return np.all(self.utilization[:, start_time:finish_time] + demands <= self.problem.res_constraints)
+    def is_free(self, np.ndarray[int, ndim=2] demands, int start_time, int finish_time):
+        cdef np.ndarray[int, ndim=2] copy_util = self.utilization[:, start_time:finish_time]
+        # cdef np.ndarray[bool, ndim=2] res_bool;
+        copy_util += demands
+        res_bool = copy_util <= self.res_constraints
+        return np.all(res_bool)
+        # return np.all(self.utilization[:, start_time:finish_time] + demands <= self.res_constraints)
+

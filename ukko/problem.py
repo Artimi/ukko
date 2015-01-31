@@ -58,5 +58,6 @@ class Problem(object):
     def duration(self, activity):
         return self.activities['duration'][activity]
 
+    @memoized
     def demands(self, activity):
         return self.activities['res_demands'][:, activity, np.newaxis]
