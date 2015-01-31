@@ -10,25 +10,25 @@ import random
 
 
 class GARTH(object):
-    def __init__(self, problem, params=None):
+    def __init__(self, problem, **kwargs):
         self.problem = problem
-        if params is None:
-            self.params = {'popSize': 100,
-                           'Rcopy': 0.1,
-                           'Rnew': 0.0,
-                           'Rmut': 0.2,
-                           'Rcross': 0.7,
-                           'nSelJobs': 5,
-                           'dist': 10000}  # unlimited
-        else:
-            self.params = params
-        for key in ['Rcopy', 'Rnew', 'Rmut', 'Rcross']:
+        self.params = {'popSize': 100,
+                       'Rcopy': 0.1,
+                       'Rnew': 0.0,
+                       'Rmut': 0.2,
+                       'Rcross': 0.7,
+                       'nSelJobs': 5,
+                       'dist': 10000,
+                       'schedule_limit': 5000}
+        self.params.update(kwargs)
+        for key in ('Rcopy', 'Rnew', 'Rmut', 'Rcross'):
             self.params['num' + key] = int(self.params['popSize'] * self.params[key])
         self.rt = RTSystem(self.problem)
         self.ssgs = SSGS(self.problem)
         self.population = np.empty(self.params['popSize'], dtype=ActivityList)
         self.schedules = np.empty(self.params['popSize'], dtype=Schedule)
         self.makespans = np.empty(self.params['popSize'], dtype=int)
+        self.generated_schedules = 0
         self._generate_new(self.population, self.params['popSize'])
         self._evaluate_population()
 
@@ -39,8 +39,10 @@ class GARTH(object):
     def _evaluate_population(self):
         for index, al in enumerate(self.population):
             schedule = self.ssgs.get_schedule(al)
+            self.generated_schedules += 1
             self.rt.update(schedule)
             schedule.shift(schedule.RIGHT_SHIFT)
+            self.generated_schedules += 1
             self.schedules[index] = schedule
             self.makespans[index] = schedule.makespan
         for index, schedule in enumerate(self.schedules):
@@ -101,7 +103,7 @@ class GARTH(object):
         return self.schedules[self.indices][0]
 
     def run(self):
-        for i in range(10):
+        while self.generated_schedules < self.params['schedule_limit']:
             self.step()
 
 

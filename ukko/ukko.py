@@ -17,16 +17,10 @@ def main():
     rcpparser = RCPParser()
     problem_dict = rcpparser(args.rcp_file)
     problem = Problem(problem_dict)
-    params = {'popSize': 100,
-                   'Rcopy': 0.1,
-                   'Rnew': 0.0,
-                   'Rmut': 0.2,
-                   'Rcross': 0.7,
-                   'nSelJobs': 5,
-                   'dist': 10000}  # unlimited
-    g = GARTH(problem, params)
-    g.step()
+    g = GARTH(problem)
+    g.run()
     print g.best.makespan
+    print g.generated_schedules
 
 
 if __name__ == '__main__':
