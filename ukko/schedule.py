@@ -182,7 +182,7 @@ class Schedule(object):
         al = ActivityList(self.problem)
         index = 0
         for t, activities in sorted(self.start_times.items()):
-            for activity in activities:
+            for activity in sorted(activities):
                 al[index] = activity
                 index += 1
         return al
