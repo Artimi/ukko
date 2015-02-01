@@ -3,7 +3,7 @@ import nose
 import os.path
 
 import numpy as np
-from ukko import RCPParser, Problem,  ActivityList, Schedule, ResourceUtilization, SSGS, RTHypothesis, RTSystem, GARTH
+from ukko import RCPParser, Problem,  ActivityList, Schedule, SSGS, RTHypothesis, RTSystem, GARTH, ResourceUtilization
 from ukko.utils import PrecedenceException
 
 PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '../')
