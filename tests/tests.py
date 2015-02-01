@@ -183,7 +183,7 @@ class ResourceUtilizationTestCase(unittest.TestCase):
         parser = RCPParser()
         self.problem_dict = parser(TEST_FILE)
         self.problem = Problem(self.problem_dict)
-        self.ru = ResourceUtilization(self.problem, max_makespan=16)
+        self.ru = ResourceUtilization(self.problem.res_constraints, self.problem.num_resources , max_makespan=16)
 
     def test_add(self):
         self.ru.add(np.array([[4, 0, 0, 0]]).T, 0, 8)

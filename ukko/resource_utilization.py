@@ -5,10 +5,11 @@ import numpy as np
 
 
 class ResourceUtilization(object):
-    def __init__(self, problem, max_makespan=16):
-        self.problem = problem
+    def __init__(self, res_constraints,  num_resources, max_makespan=16):
+        self.res_constraints = res_constraints
+        self.num_resources = num_resources
         self.max_makespan = max_makespan
-        self.utilization = np.zeros([self.problem.num_resources, max_makespan], dtype=int)
+        self.utilization = np.zeros([self.num_resources, max_makespan], dtype=int)
 
     def add(self, demands, start_time, finish_time):
         if finish_time > self.max_makespan:
@@ -21,7 +22,7 @@ class ResourceUtilization(object):
     def extend_makespan(self, minimal_extend_time):
         if minimal_extend_time > self.max_makespan:
             difference = self.max_makespan * math.floor(minimal_extend_time / self.max_makespan)
-            extension = np.zeros([self.problem.num_resources, difference], dtype=int)
+            extension = np.zeros([self.num_resources, difference], dtype=int)
             self.utilization = np.hstack((self.utilization, extension))
             self.max_makespan += difference
 
@@ -29,7 +30,7 @@ class ResourceUtilization(object):
         return self.utilization[resource][time]
 
     def get_capacity(self, resource, time):
-        return self.problem.res_constraints[resource] - self.get(resource, time)
+        return self.res_constraints[resource] - self.get(resource, time)
 
     def is_free(self, demands, start_time, finish_time):
-        return np.all(self.utilization[:, start_time:finish_time] + demands <= self.problem.res_constraints)
+        return np.all(self.utilization[:, start_time:finish_time] + demands <= self.res_constraints)

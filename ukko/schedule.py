@@ -17,7 +17,7 @@ class Schedule(object):
         self.problem = problem
         self.start_times = dict()
         self.finish_times = dict()
-        self.res_utilization = ResourceUtilization(problem)
+        self.res_utilization = ResourceUtilization(problem.res_constraints, problem.num_resources)
         self.scheduled_activities = set()
         self.finish_times_activities = dict()
         self.start_times_activities = dict()
