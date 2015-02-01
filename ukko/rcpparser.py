@@ -9,7 +9,7 @@ class RCPParser(object):
         result = {}
         lines = self._read_lines(file_path)
         result['num_activities'], result['num_resources'] = lines[0]
-        result['res_constraints'] = np.array(lines[1], dtype=int, ndmin=2).T
+        result['res_constraints'] = np.array(lines[1], dtype=np.int, ndmin=2).T
         result['activities'], result['edges'] = self._parse_activites(lines[2:],
                                                                       result['num_resources'],
                                                                       result['num_activities'])
@@ -23,8 +23,8 @@ class RCPParser(object):
 
     @staticmethod
     def _parse_activites(lines, num_resources, num_activities):
-        result = {'duration': np.zeros(num_activities, dtype=int),
-                  'res_demands': np.zeros((num_resources, num_activities), dtype=int)}
+        result = {'duration': np.zeros(num_activities, dtype=np.int),
+                  'res_demands': np.zeros((num_resources, num_activities), dtype=np.int)}
         edges = list()
         for activity, line in enumerate(lines):
             result['duration'][activity] = line[0]
