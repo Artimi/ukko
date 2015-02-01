@@ -191,4 +191,13 @@ class Schedule(object):
                 index += 1
         return al
 
+    def __str__(self):
+        result = ''
+        sorted_start_times = sorted(self.start_times)
+        for start_time in sorted_start_times:
+            for activity in self.start_times[start_time]:
+                result += '{} {}\n'.format(activity, start_time)
+        return result
+
+
 
