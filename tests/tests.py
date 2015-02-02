@@ -153,11 +153,11 @@ class ScheduleTestCase(unittest.TestCase):
         ssgs = SSGS(self.problem)
         self.schedule = ssgs.get_schedule(self.al)
         initial_makespan = self.schedule.makespan
-        self.schedule.shift(Schedule.RIGHT_SHIFT)
+        self.schedule.right_shift()
         self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
-        self.schedule.shift(Schedule.RIGHT_SHIFT)  # nothing should change
+        self.schedule.right_shift()
         self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
-        self.schedule.shift(Schedule.LEFT_SHIFT)
+        self.schedule.left_shift()
         self.assertEqual(len(self.schedule.scheduled_activities), self.problem.num_activities)
         self.assertGreaterEqual(initial_makespan, self.schedule.makespan)  # makespan should be same or better
 
@@ -170,10 +170,10 @@ class ScheduleTestCase(unittest.TestCase):
             self.assertLessEqual(self.schedule.start_times_activities[act1],
                                  self.schedule.start_times_activities[act2])
         self.assertTrue(al.is_precedence_feasible())
-        self.schedule.shift(Schedule.RIGHT_SHIFT)
+        self.schedule.right_shift()
         al_shifted = self.schedule.serialize()
         self.assertTrue(al_shifted.is_precedence_feasible())
-        self.schedule.shift(Schedule.LEFT_SHIFT)
+        self.schedule.left_shift()
         al_shifted = self.schedule.serialize()
         self.assertTrue(al_shifted.is_precedence_feasible())
 

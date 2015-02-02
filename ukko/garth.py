@@ -41,7 +41,7 @@ class GARTH(object):
             schedule = self.ssgs.get_schedule(al)
             self.generated_schedules += 1
             self.rt.update(schedule)
-            schedule.shift(schedule.RIGHT_SHIFT)
+            schedule.right_shift()
             self.generated_schedules += 1
             self.schedules[index] = schedule
             self.makespans[index] = schedule.makespan

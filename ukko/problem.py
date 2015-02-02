@@ -55,6 +55,7 @@ class Problem(object):
     def activities(self):
         return self.problem_dict['activities']
 
+    @memoized
     def duration(self, activity):
         return self.activities['duration'][activity]
 

@@ -23,7 +23,7 @@ class SSGS(object):
     def _compute_real_start(self, schedule, activity, precedence_feasible_start):
         real_start = 0
         for t in sorted(schedule.finish_times.keys()):
-            if precedence_feasible_start <= t and schedule.can_place(activity, t):
+            if precedence_feasible_start <= t and schedule.can_place(activity, t, skip_check_precedence=True):
                 real_start = t
                 break
         return real_start

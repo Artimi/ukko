@@ -54,11 +54,13 @@ class Schedule(object):
         del self.start_times_activities[activity]
         self.res_utilization.remove(self.problem.demands(activity), start_time, finish_time)
 
-    def can_place(self, activity, start_time):
+    def can_place(self, activity, start_time, skip_check_precedence=False):
         finish_time = start_time + self.problem.duration(activity)
         res_free = self.res_utilization.is_free(self.problem.demands(activity), start_time, finish_time)
         if not res_free:
             return False
+        elif skip_check_precedence:
+            return True
         precedence = self.problem.contains_all_predecessors(self._finished_activities(start_time), activity)
         return res_free and precedence
 
@@ -150,27 +152,35 @@ class Schedule(object):
         self.plot(figsize=figsize)
         plt.savefig(file_name)
 
-    def shift(self, direction=RIGHT_SHIFT):
-        if direction == self.RIGHT_SHIFT:
-            activity_list = sorted(self.start_times.items(), reverse=True)
-        elif direction == self.LEFT_SHIFT:
-            activity_list = sorted(self.start_times.items())
+    def right_shift(self):
+        activity_list = sorted(self.start_times.items(), reverse=True)
         for start_time, activities in activity_list:
             for activity in activities:
                 if activity == 0:
                     continue
                 self.remove(activity)
                 activity_starts = set(self.start_times.keys())
-                if direction == self.RIGHT_SHIFT:
-                    times = set(range(start_time, self.latest_precedence_start(activity) + 1))
-                    times = times.intersection(activity_starts)
-                    time_list = sorted(times, reverse=True)
-                elif direction == self.LEFT_SHIFT:
-                    times = set(range(self.earliest_precedence_start(activity), start_time + 1))
-                    times = times.intersection(activity_starts)
-                    time_list = sorted(times)
+                times = set(range(start_time, self.latest_precedence_start(activity) + 1))
+                times = times.intersection(activity_starts)
+                time_list = sorted(times, reverse=True)
                 for t in time_list:
-                    if self.can_place(activity, t):
+                    if self.can_place(activity, t, skip_check_precedence=True):
+                        self.add(activity, t, force=True)
+                        break
+
+    def left_shift(self):
+        activity_list = sorted(self.start_times.items())
+        for start_time, activities in activity_list:
+            for activity in activities:
+                if activity == 0:
+                    continue
+                self.remove(activity)
+                activity_starts = set(self.start_times.keys())
+                times = set(range(self.earliest_precedence_start(activity), start_time + 1))
+                times = times.intersection(activity_starts)
+                time_list = sorted(times)
+                for t in time_list:
+                    if self.can_place(activity, t, skip_check_precedence=True):
                         self.add(activity, t, force=True)
                         break
 
@@ -178,8 +188,8 @@ class Schedule(object):
         makespan = self.makespan
         new_makespan = 0
         while new_makespan < makespan:
-            self.shift(self.RIGHT_SHIFT)
-            self.shift(self.LEFT_SHIFT)
+            self.right_shift()
+            self.left_shift()
             new_makespan = self.makespan
 
     def serialize(self):
